@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:analyzer/analyzer.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:over_react/src/builder/generation/declaration_parsing.dart';
@@ -29,18 +30,24 @@ class OverReactBuilder extends Builder {
       return;
     }
 
-    final outputs = <String>[];
-    void generateForFile(String source, AssetId id, CompilationUnit unit) {
+    bool hasDeclarations(source){
       if (!ParsedDeclarations.mightContainDeclarations(source)) {
-        return;
+        return false;
       }
+      return true;
+    }
+
+    final outputs = <String>[];
+    void generateForFile(String source, AssetId id, CompilationUnit unit, LibraryElement libElement) {
       final sourceFile = new SourceFile.fromString(
         source, url: idToPackageUri(id));
-      final declarations = new ParsedDeclarations(unit, sourceFile, log);
+
+      final declarations = new ParsedDeclarations(unit, sourceFile, log, libElement);
       if (declarations.hasErrors) {
         log.severe('There was an error parsing the file declarations for file: $id');
         return;
       }
+
       final generator = new ImplGenerator(log, sourceFile)
         ..generate(declarations);
       final generatedOutput = generator.outputContentsBuffer.toString().trim();
@@ -55,9 +62,11 @@ class OverReactBuilder extends Builder {
       // Ignore all generated `.g.dart` parts.
       .where((part) => !part.uri.stringValue.endsWith('.g.dart'));
 
-    // Generate over_react code for the input library.
-    generateForFile(source, buildStep.inputId, libraryUnit);
-
+    if (hasDeclarations(source)) {
+      var libraryElement = await buildStep.resolver.libraryFor(buildStep.inputId);
+      // Generate over_react code for the input library.
+      generateForFile(source, buildStep.inputId, libraryUnit, libraryElement);
+    }
     // Generate over_react code for each part file of the input library.
     for (final part in parts) {
       final partId = new AssetId.resolve(
@@ -71,7 +80,9 @@ class OverReactBuilder extends Builder {
       if (partUnit == null) {
         continue;
       }
-      generateForFile(partSource, partId, partUnit);
+      if (hasDeclarations(partSource)) {
+        generateForFile(partSource, partId, partUnit, null);
+      }
     }
 
     if (outputs.isNotEmpty) {

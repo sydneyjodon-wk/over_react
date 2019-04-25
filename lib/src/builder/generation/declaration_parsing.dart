@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:analyzer/analyzer.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:logging/logging.dart';
 import 'package:over_react/src/builder/util.dart';
 import 'package:over_react/src/component_declaration/annotations.dart' as annotations;
@@ -27,14 +28,13 @@ import 'package:transformer_utils/transformer_utils.dart' show getSpan, NodeWith
 /// * Any number of abstract component pieces: `@AbstractComponent()`, `@AbstractProps()`, `@AbstractState()`
 /// * Any number of mixins: `@PropsMixin()`, `@StateMixin()`
 class ParsedDeclarations {
-  factory ParsedDeclarations(CompilationUnit unit, SourceFile sourceFile, Logger logger) {
+  factory ParsedDeclarations(CompilationUnit unit, SourceFile sourceFile, Logger logger, LibraryElement libraryElement) {
     bool hasErrors = false;
     bool hasDeclarations = false;
     bool hasPropsCompanionClass = false;
     bool hasAbstractPropsCompanionClass = false;
     bool hasStateCompanionClass = false;
     bool hasAbstractStateCompanionClass = false;
-
     void error(String message, [SourceSpan span]) {
       hasErrors = true;
       logger.severe(messageWithSpan(message, span: span));
@@ -355,6 +355,8 @@ class ParsedDeclarations {
     }
 
     return new ParsedDeclarations._(
+        libraryElement: libraryElement,
+
         factory:       singleOrNull(declarationMap[key_factory]),
         component:     singleOrNull(declarationMap[key_component]),
         props:         singleOrNull(declarationMap[key_props]),
@@ -376,6 +378,7 @@ class ParsedDeclarations {
   }
 
   ParsedDeclarations._({
+      LibraryElement libraryElement,
       TopLevelVariableDeclaration factory,
       ClassDeclaration component,
       ClassDeclaration props,
@@ -396,7 +399,7 @@ class ParsedDeclarations {
       bool hasAbstractStateCompanionClass,
   }) :
       this.factory       = (factory   == null) ? null : new FactoryNode(factory),
-      this.component     = (component == null) ? null : new ComponentNode(component),
+      this.component     = (component == null) ? null : new ComponentNode(component, libraryElement),
       this.props         = (props     == null) ? null : new PropsNode(props, hasPropsCompanionClass),
       this.state         = (state     == null) ? null : new StateNode(state, hasStateCompanionClass),
 
@@ -486,25 +489,30 @@ class ComponentNode extends NodeWithMeta<ClassDeclaration, annotations.Component
   static const String _subtypeOfParamName = 'subtypeOf';
 
   /// Whether the component extends from Component2.
-  final bool isComponent2;
+  bool isComponent2 = false;
+
+  ClassElement componentClassElement;
 
   /// The value of the `subtypeOf` parameter passed in to this node's annotation.
   Identifier subtypeOfValue;
 
-  ComponentNode(ClassDeclaration node)
-      : this.isComponent2 = node.declaredElement == null
-            // This can be null when using non-resolved AST in tests; FIXME 3.0.0-wip do we need to update that setup?
-            ? false
-            // TODO 3.0.0-wip is there a better way to check against react's Component2?
-            : node.declaredElement.allSupertypes.any((type) {
-              return type.name == 'Component2';
-            }),
+  ComponentNode(ClassDeclaration node, LibraryElement libraryElement)
+      :
         super(node) {
+          if (libraryElement != null) {
+    var classElements = libraryElement.units.expand((cu) => cu.types);
     // Perform special handling for the `subtypeOf` parameter of this node's annotation.
     //
     // If valid, omit it from `unsupportedArguments` so that the `meta` can be accessed without it
     // (with the value available via `subtypeOfValue`), given that all other arguments are valid.
+    this.componentClassElement = classElements.firstWhere((classElement){
+      return classElement.name == node.name.name;
+    });
 
+    this.isComponent2 = this.componentClassElement.allSupertypes.any((type) {
+              return type.name == 'Component2';
+            });
+          }
     NamedExpression subtypeOfParam = this.unsupportedArguments.firstWhere((expression) {
       return expression is NamedExpression && expression.name.label.name == _subtypeOfParamName;
     }, orElse: () => null);

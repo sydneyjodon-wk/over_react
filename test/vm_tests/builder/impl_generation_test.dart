@@ -43,7 +43,7 @@ main() {
       sourceFile = new SourceFile.fromString(source);
 
       unit = parseCompilationUnit(source);
-      declarations = new ParsedDeclarations(unit, sourceFile, logger);
+      declarations = new ParsedDeclarations(unit, sourceFile, logger, null);
       implGenerator = new ImplGenerator(logger, sourceFile);
     }
 

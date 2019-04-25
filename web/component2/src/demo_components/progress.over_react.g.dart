@@ -298,25 +298,25 @@ class ProgressProps extends _$ProgressProps with _$ProgressPropsAccessorsMixin {
   static const PropsMeta meta = _$metaForProgressProps;
 }
 
-_$$ProgressProps _$Progress([Map backingProps]) =>
-    new _$$ProgressProps(backingProps);
+_$$ProgressProps _$Progress([Map backingProps]) => backingProps == null
+    ? new _$$ProgressProps$JsMap(new JsBackedMap())
+    : new _$$ProgressProps(backingProps);
 
 // Concrete props implementation.
 //
 // Implements constructor and backing map, and links up to generated component factory.
-class _$$ProgressProps extends _$ProgressProps
+abstract class _$$ProgressProps extends _$ProgressProps
     with _$ProgressPropsAccessorsMixin
     implements ProgressProps {
-  // This initializer of `_props` to an empty map, as well as the reassignment
-  // of `_props` in the constructor body is necessary to work around a DDC bug: https://github.com/dart-lang/sdk/issues/36217
-  _$$ProgressProps(Map backingMap) : this._props = {} {
-    this._props = backingMap ?? {};
-  }
+  _$$ProgressProps._();
 
-  /// The backing props map proxied by this class.
-  @override
-  Map get props => _props;
-  Map _props;
+  factory _$$ProgressProps(Map backingMap) {
+    if (backingMap is JsBackedMap) {
+      return new _$$ProgressProps$JsMap(backingMap);
+    } else {
+      return new _$$ProgressProps$PlainMap(backingMap);
+    }
+  }
 
   /// Let [UiProps] internals know that this class has been generated.
   @override
@@ -329,6 +329,39 @@ class _$$ProgressProps extends _$ProgressProps
   /// The default namespace for the prop getters/setters generated for this class.
   @override
   String get propKeyNamespace => 'ProgressProps.';
+}
+
+// Concrete props implementation that can be backed by any [Map].
+class _$$ProgressProps$PlainMap extends _$$ProgressProps {
+  // This initializer of `_props` to an empty map, as well as the reassignment
+  // of `_props` in the constructor body is necessary to work around a DDC bug: https://github.com/dart-lang/sdk/issues/36217
+  _$$ProgressProps$PlainMap(Map backingMap)
+      : this._props = {},
+        super._() {
+    this._props = backingMap ?? {};
+  }
+
+  /// The backing props map proxied by this class.
+  @override
+  Map get props => _props;
+  Map _props;
+}
+
+// Concrete props implementation that can only be backed by [JsMap],
+// allowing dart2js to compile more optimal code for key-value pair reads/writes.
+class _$$ProgressProps$JsMap extends _$$ProgressProps {
+  // This initializer of `_props` to an empty map, as well as the reassignment
+  // of `_props` in the constructor body is necessary to work around a DDC bug: https://github.com/dart-lang/sdk/issues/36217
+  _$$ProgressProps$JsMap(JsBackedMap backingMap)
+      : this._props = new JsBackedMap(),
+        super._() {
+    this._props = backingMap ?? new JsBackedMap();
+  }
+
+  /// The backing props map proxied by this class.
+  @override
+  JsBackedMap get props => _props;
+  JsBackedMap _props;
 }
 
 abstract class _$ProgressStateAccessorsMixin implements _$ProgressState {
@@ -378,12 +411,31 @@ class ProgressState extends _$ProgressState with _$ProgressStateAccessorsMixin {
 // Concrete state implementation.
 //
 // Implements constructor and backing map.
-class _$$ProgressState extends _$ProgressState
+abstract class _$$ProgressState extends _$ProgressState
     with _$ProgressStateAccessorsMixin
     implements ProgressState {
+  _$$ProgressState._();
+
+  factory _$$ProgressState(Map backingMap) {
+    if (backingMap is JsBackedMap) {
+      return new _$$ProgressState$JsMap(backingMap);
+    } else {
+      return new _$$ProgressState$PlainMap(backingMap);
+    }
+  }
+
+  /// Let [UiState] internals know that this class has been generated.
+  @override
+  bool get $isClassGenerated => true;
+}
+
+// Concrete state implementation that can be backed by any [Map].
+class _$$ProgressState$PlainMap extends _$$ProgressState {
   // This initializer of `_state` to an empty map, as well as the reassignment
   // of `_state` in the constructor body is necessary to work around a DDC bug: https://github.com/dart-lang/sdk/issues/36217
-  _$$ProgressState(Map backingMap) : this._state = {} {
+  _$$ProgressState$PlainMap(Map backingMap)
+      : this._state = {},
+        super._() {
     this._state = backingMap ?? {};
   }
 
@@ -391,10 +443,23 @@ class _$$ProgressState extends _$ProgressState
   @override
   Map get state => _state;
   Map _state;
+}
 
-  /// Let [UiState] internals know that this class has been generated.
+// Concrete state implementation that can only be backed by [JsMap],
+// allowing dart2js to compile more optimal code for key-value pair reads/writes.
+class _$$ProgressState$JsMap extends _$$ProgressState {
+  // This initializer of `_state` to an empty map, as well as the reassignment
+  // of `_state` in the constructor body is necessary to work around a DDC bug: https://github.com/dart-lang/sdk/issues/36217
+  _$$ProgressState$JsMap(JsBackedMap backingMap)
+      : this._state = new JsBackedMap(),
+        super._() {
+    this._state = backingMap ?? new JsBackedMap();
+  }
+
+  /// The backing state map proxied by this class.
   @override
-  bool get $isClassGenerated => true;
+  JsBackedMap get state => _state;
+  JsBackedMap _state;
 }
 
 // Concrete component implementation mixin.
@@ -402,9 +467,38 @@ class _$$ProgressState extends _$ProgressState
 // Implements typed props/state factories, defaults `consumedPropKeys` to the keys
 // generated for the associated props class.
 class _$ProgressComponent extends ProgressComponent {
+  _$$ProgressProps$JsMap _cachedTypedProps;
+
+  @override
+  _$$ProgressProps$JsMap get props => _cachedTypedProps;
+
+  @override
+  set props(Map value) {
+    super.props = value;
+    _cachedTypedProps = typedPropsFactoryJs(value);
+  }
+
+  @override
+  _$$ProgressProps$JsMap typedPropsFactoryJs(JsBackedMap backingMap) =>
+      new _$$ProgressProps$JsMap(backingMap);
+
   @override
   _$$ProgressProps typedPropsFactory(Map backingMap) =>
       new _$$ProgressProps(backingMap);
+
+  _$$ProgressState$JsMap _cachedTypedState;
+  @override
+  _$$ProgressState$JsMap get state => _cachedTypedState;
+
+  @override
+  set state(Map value) {
+    super.state = value;
+    _cachedTypedState = typedStateFactoryJs(value);
+  }
+
+  @override
+  _$$ProgressState$JsMap typedStateFactoryJs(JsBackedMap backingMap) =>
+      new _$$ProgressState$JsMap(backingMap);
 
   @override
   _$$ProgressState typedStateFactory(Map backingMap) =>

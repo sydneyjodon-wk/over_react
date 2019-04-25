@@ -63,7 +63,7 @@ main() {
         logger = new MockLogger();
         sourceFile = new SourceFile.fromString(source);
         unit = parseCompilationUnit(source, suppressErrors: false, parseFunctionBodies: true);
-        declarations = new ParsedDeclarations(unit, sourceFile, logger);
+        declarations = new ParsedDeclarations(unit, sourceFile, logger, null);
       }
 
       void verifyNoMoreErrorLogs() {
@@ -307,12 +307,12 @@ main() {
 
                 @Props(keyNamespace: "bar")
                 class _\$FooProps {}
-                
+
                 class FooProps extends _\$FooProps with _\$FooPropsAccessorsMixin {}
 
                 @State(keyNamespace: "baz")
                 class _\$FooState extends _\$FooState with _\$FooStateAccessorsMixin {}
-                
+
                 class FooState extends _\$FooState with _\$FooStateAccessorsMixin {}
 
                 @Component(isWrapper: true)

@@ -16,12 +16,12 @@
 library react_wrappers_test;
 
 import 'dart:html';
+import 'dart:js_util';
 
 import 'package:js/js.dart';
 import 'package:over_react/over_react.dart';
 import 'package:react/react.dart' as react;
 import 'package:react/react_client.dart';
-import 'package:react/react_client/js_interop_helpers.dart';
 import 'package:react/react_client/react_interop.dart';
 import 'package:over_react/react_dom.dart' as react_dom;
 import 'package:react/react_test_utils.dart' as react_test_utils;
@@ -350,7 +350,7 @@ main() {
         });
 
         test('a plain JS object', () {
-          expect(isValidElement(new EmptyObject()), isFalse);
+          expect(isValidElement(newObject()), isFalse);
         });
 
         test('a ReactElement', () {
@@ -987,7 +987,7 @@ main() {
         });
 
         test('an empty JS object', () {
-          expect(() => getProps(new EmptyObject()), throwsArgumentError);
+          expect(() => getProps(newObject()), throwsArgumentError);
         });
 
         test('a String', () {
@@ -1018,6 +1018,7 @@ main() {
                 cloneElement(instanceWithRef, {'ref': chainedRef})
             );
             var component = getDartComponent(renderedInstance);
+            // ignore: deprecated_member_use
             expect(component, const TypeMatcher<react.Component>(), reason: 'test setup sanity check');
 
             expect(calls, equals([
@@ -1083,6 +1084,7 @@ main() {
               cloneElement(instanceWithoutRef, {'ref': chainedRef})
           );
           var component = getDartComponent(renderedInstance);
+          // ignore: deprecated_member_use
           expect(component, const TypeMatcher<react.Component>(), reason: 'test setup sanity check');
 
           expect(calls, equals([
@@ -1103,6 +1105,7 @@ main() {
               cloneElement(instanceWithRef, {'ref': chainedRef})
           );
           var component = getDartComponent(renderedInstance);
+          // ignore: deprecated_member_use
           expect(component, const TypeMatcher<react.Component>(), reason: 'test setup sanity check');
 
           expect(calls, equals([
@@ -1136,6 +1139,7 @@ main() {
 
 /// Helper component for testing a Dart (react-dart) React component with cloneElement.
 final TestComponentFactory = react.registerComponent(() => new TestComponent());
+// ignore: deprecated_member_use
 class TestComponent extends react.Component {
   @override
   render() => Dom.div()();
@@ -1156,6 +1160,7 @@ class PlainObjectStyleMap {
 /// Helper component that renders whatever you tell it to. Necessary for rendering components with the 'ref' prop.
 final RenderingContainerComponentFactory = react.registerComponent(() => new RenderingContainerComponent());
 
+// ignore: deprecated_member_use
 class RenderingContainerComponent extends react.Component {
   @override
   render() => props['renderer']();
